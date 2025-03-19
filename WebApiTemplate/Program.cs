@@ -8,6 +8,7 @@ using WebApiTemplate.Repository.Database;
 using WebApiTemplate.Services.Interfaces;
 using WebApiTemplate.Services;
 using WebApiTemplate.Validators;
+using WebApiTemplate.Validators.Genre;
 using FluentValidation;
 using WebApiTemplate.DTOs;
 
@@ -31,6 +32,10 @@ builder.Services.AddScoped<IBookService, BookService>();
 //Review services
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
+//Genre services
+builder.Services.AddScoped<IGenreService, GenreService>();
+
+
 
 // Register Fluent Validation
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
@@ -41,6 +46,11 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateReviewDTO>();
 
 //Book Validator
 builder.Services.AddScoped<IValidator<CreateBookDto>, BookValidator>();
+
+//Genre Validator
+builder.Services.AddValidatorsFromAssemblyContaining<CreateGenreDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UpdateGenreDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<TagGenreDtoValidator>();
 
 // Add Identity and other necessary services
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
