@@ -121,7 +121,7 @@ namespace WebApiTemplate.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Unauthorized update attempt. ReviewId: {ReviewId} by UserId: {UserId}", reviewId, userId);
-                return Forbid(ex.Message);
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {

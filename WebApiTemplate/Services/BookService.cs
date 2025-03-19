@@ -27,7 +27,7 @@ namespace WebApiTemplate.Services
                     ISBN = book.ISBN,
                     Title = book.Title,
                     Author = book.Author,
-                    Genre = book.Genre,
+                    Genres = book.BookGenres.Select(bg => bg.Genre!.Name).ToList(),
                     Publisher = book.Publisher,
                     PublicationYear = book.PublicationYear
                 })
@@ -46,7 +46,7 @@ namespace WebApiTemplate.Services
                 ISBN = book.ISBN,
                 Title = book.Title,
                 Author = book.Author,
-                Genre = book.Genre,
+                Genres = book.BookGenres.Select(bg => bg.Genre!.Name).ToList(),
                 Publisher = book.Publisher,
                 PublicationYear = book.PublicationYear
             };
@@ -94,9 +94,17 @@ namespace WebApiTemplate.Services
             book.ISBN = bookDto.ISBN;
             book.Title = bookDto.Title;
             book.Author = bookDto.Author;
-            book.Genre = bookDto.Genre;
             book.Publisher = bookDto.Publisher;
             book.PublicationYear = bookDto.PublicationYear;
+            book.BookGenres.Clear();
+            foreach (var genreId in bookDto.GenreIds)
+            {
+                var genre = await _context.Genres.FindAsync(genreId);
+                if (genre != null)
+                {
+                    book.BookGenres.Add(new BookGenre { BookId = book.Id, GenreId = genre.Id });
+                }
+            }
 
             _context.Books.Update(book);
             await _context.SaveChangesAsync();
@@ -107,7 +115,7 @@ namespace WebApiTemplate.Services
                 ISBN = book.ISBN,
                 Title = book.Title,
                 Author = book.Author,
-                Genre = book.Genre,
+                Genres = book.BookGenres.Select(bg => bg.Genre!.Name).ToList(),
                 Publisher = book.Publisher,
                 PublicationYear = book.PublicationYear
             };
@@ -140,10 +148,17 @@ namespace WebApiTemplate.Services
                 ISBN = bookDto.ISBN,
                 Title = bookDto.Title,
                 Author = bookDto.Author,
-                Genre = bookDto.Genre,
                 Publisher = bookDto.Publisher,
                 PublicationYear = bookDto.PublicationYear
             };
+            foreach (var genreId in bookDto.GenreIds)
+            {
+                var genre = await _context.Genres.FindAsync(genreId);
+                if (genre != null)
+                {
+                    book.BookGenres.Add(new BookGenre { BookId = book.Id, GenreId = genre.Id });
+                }
+            }
 
             // Save to database
             _context.Books.Add(book);
@@ -156,7 +171,7 @@ namespace WebApiTemplate.Services
                 ISBN = book.ISBN,
                 Title = book.Title,
                 Author = book.Author,
-                Genre = book.Genre,
+                Genres = book.BookGenres.Select(bg => bg.Genre!.Name).ToList(),
                 Publisher = book.Publisher,
                 PublicationYear = book.PublicationYear
             };
@@ -195,7 +210,7 @@ namespace WebApiTemplate.Services
                 book.ISBN,
                 book.Title,
                 book.Author,
-                book.Genre,
+                Genres = book.BookGenres.Select(bg => bg.Genre?.Name).ToList(),
                 book.Publisher,
                 book.PublicationYear,
                 AverageRating = averageRating,

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Humanizer;
+using System.Configuration;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using WebApiTemplate.Models;
@@ -12,6 +14,9 @@ namespace WebApiTemplate.Repository.Database
         // DbSet for Book and Review Models
         public DbSet<Book> Books { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Genre> Genres { get; set; }
+
+        public DbSet<BookGenre> BookGenres { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,6 +52,25 @@ namespace WebApiTemplate.Repository.Database
             // Unique Review Constraint (User can review a book only once)
             modelBuilder.Entity<Review>()
                 .HasIndex(r => new { r.UserId, r.BookId })
+                .IsUnique();
+
+            // Many - to - Many Configuration for Book and Genre
+            modelBuilder.Entity<BookGenre>()
+                .HasKey(bg => new { bg.BookId, bg.GenreId });
+
+            modelBuilder.Entity<BookGenre>()
+                .HasOne(bg => bg.Book)
+                .WithMany(b => b.BookGenres)
+                .HasForeignKey(bg => bg.BookId);
+
+            modelBuilder.Entity<BookGenre>()
+                .HasOne(bg => bg.Genre)
+                .WithMany(g => g.BookGenres)
+                .HasForeignKey(bg => bg.GenreId);
+
+            // Unique constraint on Genre Name
+            modelBuilder.Entity<Genre>()
+                .HasIndex(g => g.Name)
                 .IsUnique();
         }
     }
