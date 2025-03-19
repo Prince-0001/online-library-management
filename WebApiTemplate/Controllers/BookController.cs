@@ -22,11 +22,11 @@ namespace WebApiTemplate.Controllers
         }
 
         // GET: api/book
-        [HttpGet]
+        [HttpGet("all")]
         [Authorize]
         public async Task<IActionResult> GetAllBooks()
         {
-            var books = await _bookService.GetBooksAsync();
+            var books = await _bookService.GetAllBooksAsync();
             return Ok(books);
         }
 
@@ -127,6 +127,14 @@ namespace WebApiTemplate.Controllers
             if (bookDetails == null)
                 return NotFound($"Book with ID {bookId} not found.");
             return Ok(bookDetails);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetBooks([FromQuery] BookFilterParams filterParams)
+        {
+            var result = await _bookService.GetBooksAsync(filterParams);
+            return Ok(result);
         }
     }
 }

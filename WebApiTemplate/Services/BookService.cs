@@ -18,7 +18,7 @@ namespace WebApiTemplate.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<BookDTO>> GetBooksAsync()
+        public async Task<IEnumerable<BookDTO>> GetAllBooksAsync()
         {
             return await _context.Books
                 .Select(book => new BookDTO
@@ -225,7 +225,57 @@ namespace WebApiTemplate.Services
             };
         }
 
-       
-    }
+        public async Task<PagedResult<BookDTO>> GetBooksAsync(BookFilterParams filterParams)
+        {
+            var query = _context.Books.AsQueryable();
+
+            // Filtering
+            if (!string.IsNullOrEmpty(filterParams.Title))
+                query = query.Where(b => b.Title.Contains(filterParams.Title));
+
+            if (!string.IsNullOrEmpty(filterParams.Author))
+                query = query.Where(b => b.Author.Contains(filterParams.Author));
+
+            if (!string.IsNullOrEmpty(filterParams.Publisher))
+                query = query.Where(b => b.Publisher.Contains(filterParams.Publisher));
+
+            if (filterParams.PublicationYear.HasValue)
+                query = query.Where(b => b.PublicationYear == filterParams.PublicationYear.Value);
+
+            if (filterParams.Genres != null && filterParams.Genres.Any())
+            {
+                query = query.Where(b => b.BookGenres.Any(bg => filterParams.Genres.Contains(bg.Genre!.Name)));
+            }
+
+            // Total Count before Pagination
+            int totalCount = await query.CountAsync();
+
+            // Pagination
+            var books = await query
+                .Skip((filterParams.PageNumber - 1) * filterParams.PageSize)
+                .Take(filterParams.PageSize)
+                .Select(book => new BookDTO
+                {
+                    Id = book.Id,
+                    ISBN = book.ISBN,
+                    Title = book.Title,
+                    Author = book.Author,
+                    Genres = book.BookGenres.Select(bg => bg.Genre!.Name).ToList(),
+                    Publisher = book.Publisher,
+                    PublicationYear = book.PublicationYear
+                })
+                .ToListAsync();
+
+            return new PagedResult<BookDTO>
+            {
+                Items = books,
+                TotalCount = totalCount,
+                PageNumber = filterParams.PageNumber,
+                PageSize = filterParams.PageSize
+            };
+        }
+
+
+        }
 }
 
